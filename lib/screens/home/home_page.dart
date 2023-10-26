@@ -16,21 +16,16 @@ class _HomePageState extends State<HomePage> {
   final _dio = Dio(BaseOptions(responseType: ResponseType.plain));
   List<TodoItem>? _itemList;
   String? _error;
+  Map<String, dynamic>? list ;
 
   void getTodos() async {
     try {
-      setState(() {
-        _error = null;
-      });
-
-      await Future.delayed(const Duration(seconds: 3), () {});
-
-      final response = await _dio.get('https://jsonplaceholder.typicode.com/albums');
+      final response = await _dio.get('https://cpsu-test-api.herokuapp.com/api/1_2566/weather/current?city=bangkok');
       debugPrint(response.data.toString());
       // parse
-      List list = jsonDecode(response.data.toString());
+
       setState(() {
-        _itemList = list.map((item) => TodoItem.fromJson(item)).toList();
+        list = jsonDecode(response.data.toString());
       });
     } catch (e) {
       setState(() {
@@ -48,102 +43,123 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget body;
-    if (_error != null) {
-      body = Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(_error!),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              getTodos();
-            },
-            child: Text('RETRY'),
-          )
-        ],
-      );
-    } else if (_itemList == null) {
-      body = const Center(child: CircularProgressIndicator());
-    } else {
-      body = ListView.builder(
-        itemCount: _itemList!.length,
-        itemBuilder: (context, index) {
-          var todoItem = _itemList![index];
+    bool _isButton1Enabled = true;
 
-          return Card(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    void _toggleButtons() {
+      setState(() {
+        _isButton1Enabled = !_isButton1Enabled;
+      });
+    }
+    return MaterialApp(
+      title: 'Weather App',
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Weather App'),
+        ),
+        body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 30, 16, 0),
+                  child: Text('${list?['city']}',style: TextStyle(fontSize: 50,fontWeight: FontWeight.bold)),
+                ),
+                Text('${list!['country']}',style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold)),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('${list?['lastUpdated']}'),
+                ),
+                Image.network(
+                  'https://cdn.weatherapi.com/weather/128x128/day/116.png',
+                  width: 100,
+                  height: 100,
+                ),
+                Text('Partly cloudy'),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('${list?['tempC']}',style: TextStyle(fontSize: 50,fontWeight: FontWeight.bold)),
+                ),
+                Text('Feels like ${list?['feelsLikeC']}',style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold)),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Container(
-                          child: Row(
-                            children: [
-                              Text(todoItem.title),
-                            ],
-                          ),
-                        ),
+                      ElevatedButton(
+                        onPressed: _isButton1Enabled ? () {
+                          print('Button 1 pressed');
+                        } : null,
+                        child: Text('°C',style: TextStyle (fontSize: 35,fontWeight: FontWeight.bold),),
                       ),
-                      Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(25),
-                                color: Color(0xFFFFD9F2),
-
-                              ),
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                                    child: Text('Album ID: '+todoItem.id.toString()),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(25),
-                                color: Color(0xFFC1D8FF),
-
-                              ),
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                                    child: Text('User ID: '+todoItem.userId.toString()),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                      SizedBox.fromSize(size: Size(30, 30)),
+                      ElevatedButton(
+                        onPressed: _isButton1Enabled ? () {
+                          print('Button 1 pressed');
+                        } : null,
+                        child: Text('°F',style: TextStyle (fontSize: 35,fontWeight: FontWeight.bold, color: Colors.grey),),
                       ),
                     ],
                   ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              children: [
+                                Icon(
+                                  Icons.water,
+                                  size: 40, // ขนาดของ Icon
+                                  color: Colors.grey,
 
-                ],
-              ),
+                                ),
+                                Text('HUMIDITY',style: TextStyle(color: Colors.grey),),
+                                Text('${list?['humidity']}'),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Icon(
+                                  Icons.air,
+                                  size: 40,
+                                  color: Colors.grey,
+
+                                ),
+                                Text('WIND',style: TextStyle(color: Colors.grey),),
+                                Text('${list?['windKph']} km/h'),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Icon(
+                                  Icons.sunny,
+                                  size: 40,
+                                  color: Colors.grey,
+
+                                ),
+                                Text('UV',style: TextStyle(color: Colors.grey),),
+                                Text('${list?['uv']}'),
+                              ],
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                )
+
+
+
+              ],
             ),
-          );
-        },
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(title: Center(child: const Text('PhotoAlbums',))),
-      body: body,
+        ),
+      ),
     );
   }
+
 }
